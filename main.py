@@ -1,6 +1,5 @@
+# ;Version 3
 from PF import *
-
-backup_project(filter=[".txt", ".py"])
 
 class ShowTime:
     """
@@ -39,7 +38,7 @@ class ShowTime:
         else:
             self.file_user_suggested = open(f"{file[:file.index('.')]}_user_suggestion.txt", "w+")
             p(f"Created '{file[:file.index('.')]}_user_suggestion.txt'")
-        self.file_watched.write(f"\n==========================\n{self.run_date}\n==========================\n")
+        self.file_watched.write(f"\n==========================\nStart Date: {self.run_date}\nEnd Date:\n==============================================\n")
 
         for suggestion in self.contents:
             if suggestion in ["", "\n", " "]:
@@ -104,6 +103,67 @@ class ShowTime:
         self.file_watched.close()
         self.file_user_suggested.close()
 
+    def fill_end_date(self):
+        with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "r+t") as history_file:
+            history_file.seek(0)
+            history = history_file.read().split("\n") # ;("==========================")
+            lnRepo = {}
+            endDateRepo = []
+            lc = 0 # ;Character Count
+            ln = 0 # ;Line Number
+            isTimeDataDone = False
+            for a in range(len(history)):
+                current_info = {}
+                lc += len(str(history[a]+"\n").encode("utf-8"))
+                isOldVersion = False # ;True when the items contain usernames and movie only
+                if not a+4 >= len(history):
+                    if history[a] == "==========================":
+                        if history[a+2] == "==========================" or history[a+1].__contains__("Start Date"):
+                            start_data = history[a:a+3]
+                            date = start_data[1]
+                            date_name = ""
+                            if history[a+1].__contains__("Start Date: "):
+                                start_data = history[a:a+4]
+                                start_date_location = lc+len(start_data[1])
+                                end_date_location = lc+len(start_data[1]+start_data[2])
+                                end_date_location_ln = ln
+                                for date_dat in range(len(date[len("Start Date: "):])):
+                                    date_dat_l = date[len("Start Date: ")+date_dat]
+                                    if date_dat_l == "-":
+                                        date_name += "_"
+                                    elif date_dat_l == ":":
+                                        date_name += "_"
+                                    elif date_dat_l.isspace():
+                                        date_name += "-"
+                                    else:
+                                        date_name += date_dat_l
+                                current_info.update({"location": [lc, start_date_location, end_date_location, ln], "isOld": isOldVersion, "suggestions": []})
+                                endDateRepo.append(current_info["location"][2])
+                            else:
+                                isOldVersion = True
+                                for date_dat in range(len(date)):
+                                    date_dat_l = date[date_dat]
+                                    if date_dat_l == "-":
+                                        date_name += "_"
+                                    elif date_dat_l == ":":
+                                        date_name += "_"
+                                    elif date_dat_l.isspace():
+                                        date_name += "-"
+                                    else:
+                                        date_name += date_dat_l
+                                current_info.update({"location": [lc, lc+len(date)], "isOld": isOldVersion, "suggestions": []})
+                            lnRepo.update({date_name: current_info})
+                            isTimeDataDone = True
+                    elif history[a].__contains__("|") and isTimeDataDone:
+                        if history[a].__contains__("<") and history[a].__contains__(">"):
+                            if "suggestions" in lnRepo[date_name].keys():
+                                lnRepo[date_name]["suggestions"].append(history[a])
+                        elif "suggestions" in lnRepo[date_name].keys():
+                            lnRepo[date_name]["suggestions"].append(history[a])
+                    ln += 1
+            history_file.seek(endDateRepo[-1])
+            history_file.writelines(f": {datetime.now().strftime('%Y-%m-%d %I:%M %p')}\n")
+    
     def run(self):
         # LIST
         watched_shows_list = []  # ; Finished movies list
@@ -138,21 +198,24 @@ class ShowTime:
                 if randint(1, 100000) == 2 / 100000:  # ;Added a little fun to the mix
                     p("The cycle is broken! :D")
                 self.remove_from_list(self.show_data, first, watched_shows_list)
-                self.file_watched.write(f"{first[0]}\n")
+                self.file_watched.write(f"{first[0]} | {first[1]} <{datetime.now().strftime('%Y-%m-%d %I:%M %p')}>\n")
                 p(f"\nShows watched: {len(watched_shows_list)}\n\nWatched Shows: {watched_shows_list}")  # ;Shows current information
                 self.save_to_counter_file_from_list(usernames, unknown_users)
+                self.file_watched.close()
+                self.fill_end_date()
                 break
 
             self.list_data(search="dbg_data", use_alt_list=True)
 
             self.remove_from_list(self.show_data, first, watched_shows_list)
-            self.file_watched.write(f"{first[0]} | {first[1]}\n")  # ;Saves the watched show/series with the user whom suggested it in a file for referrence
+            self.file_watched.write(f"{first[0]} | {first[1]} <{datetime.now().strftime('%Y-%m-%d %I:%M %p')}>\n")  # ;Saves the watched show/series with the user whom suggested it in a file for referrence
             p(f"\nShows watched: {len(watched_shows_list)}\n\nWatched Shows: {watched_shows_list}\n\nShows: {self.show_data}")  # ;Shows current information
             p("-------------------------------------------------")
 
             if len(self.show_data) == 0:
                 p(f"Show List is empty\nSaving Usernames to {self.filename[:self.filename.index('.')]}_user_suggestion.txt")
                 self.save_to_counter_file_from_list(usernames, unknown_users)
+                self.fill_end_date()
                 break
 
 # ;ShowTime("Shows.txt").run()
@@ -194,7 +257,7 @@ class MovieNight:
         else:
             self.file_user_suggested = open(f"{file[:file.index('.')]}_user_suggestion.txt", "w+")
             p(f"Created '{file[:file.index('.')]}_user_suggestion.txt'")
-        self.file_watched.write(f"\n==========================\n{self.run_date}\n==========================\n")
+        self.file_watched.write(f"\n==========================\nStart Date: {self.run_date}\nEnd Date:\n==============================================\n")
 
         for suggestion in self.contents:
             if suggestion in ["", "\n", " "]:
@@ -228,6 +291,67 @@ class MovieNight:
                             else:
                                 p(f"\t|\t{list_data}: {vars(self)[list_data]}")
             p("\t---------------------------------------------\n-------------------------------------------------")
+    
+    def fill_end_date(self):
+        with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "r+t") as history_file:
+            history_file.seek(0)
+            history = history_file.read().split("\n") # ;("==========================")
+            lnRepo = {}
+            endDateRepo = []
+            lc = 0 # ;Character Count
+            ln = 0 # ;Line Number
+            isTimeDataDone = False
+            for a in range(len(history)):
+                current_info = {}
+                lc += len(str(history[a]+"\n").encode("utf-8"))
+                isOldVersion = False # ;True when the items contain usernames and movie only
+                if not a+4 >= len(history):
+                    if history[a] == "==========================":
+                        if history[a+2] == "==========================" or history[a+1].__contains__("Start Date"):
+                            start_data = history[a:a+3]
+                            date = start_data[1]
+                            date_name = ""
+                            if history[a+1].__contains__("Start Date: "):
+                                start_data = history[a:a+4]
+                                start_date_location = lc+len(start_data[1])
+                                end_date_location = lc+len(start_data[1]+start_data[2])
+                                end_date_location_ln = ln
+                                for date_dat in range(len(date[len("Start Date: "):])):
+                                    date_dat_l = date[len("Start Date: ")+date_dat]
+                                    if date_dat_l == "-":
+                                        date_name += "_"
+                                    elif date_dat_l == ":":
+                                        date_name += "_"
+                                    elif date_dat_l.isspace():
+                                        date_name += "-"
+                                    else:
+                                        date_name += date_dat_l
+                                current_info.update({"location": [lc, start_date_location, end_date_location, ln], "isOld": isOldVersion, "suggestions": []})
+                                endDateRepo.append(current_info["location"][2])
+                            else:
+                                isOldVersion = True
+                                for date_dat in range(len(date)):
+                                    date_dat_l = date[date_dat]
+                                    if date_dat_l == "-":
+                                        date_name += "_"
+                                    elif date_dat_l == ":":
+                                        date_name += "_"
+                                    elif date_dat_l.isspace():
+                                        date_name += "-"
+                                    else:
+                                        date_name += date_dat_l
+                                current_info.update({"location": [lc, lc+len(date)], "isOld": isOldVersion, "suggestions": []})
+                            lnRepo.update({date_name: current_info})
+                            isTimeDataDone = True
+                    elif history[a].__contains__("|") and isTimeDataDone:
+                        if history[a].__contains__("<") and history[a].__contains__(">"):
+                            if "suggestions" in lnRepo[date_name].keys():
+                                lnRepo[date_name]["suggestions"].append(history[a])
+                        elif "suggestions" in lnRepo[date_name].keys():
+                            lnRepo[date_name]["suggestions"].append(history[a])
+                    ln += 1
+            history_file.seek(endDateRepo[-1])
+            history_file.writelines(f": {datetime.now().strftime('%Y-%m-%d %I:%M %p')}\n")
 
     def save_to_counter_file_from_list(self, main_list, main_list_unknowns):
         # CODE
@@ -257,6 +381,7 @@ class MovieNight:
         self.file.close()
         self.file_watched.close()
         self.file_user_suggested.close()
+    
 
     def roll_dice(self):
         # LIST
@@ -281,7 +406,7 @@ class MovieNight:
             pick = choice(self.movie_data)  # ;Chooses movie randomly
             pick_movie = pick[0]  # ;Movie
             pick_suggested_by = pick[1]  # ;Gets the user who suggested the movie
-            p(f"Movie Picked '{pick}'\nSuggested By: {pick_suggested_by}\n")  # ;Chooses movie randomly and shows who suggested it
+            p(f"Movie Picked '{pick}'\nSuggested By: {pick_suggested_by}\n")  # ;Chooses movie randomly and shows who suggested it with when it was picked
             command = input("Is movie done? ")  # ;Waits for confirmation from user if the show one/more are watching is done
             p("-------------------------------------------------")
 
@@ -294,23 +419,23 @@ class MovieNight:
             if command in ["e", "E"]:  # ;If the input equals 'e', then start quit program sequence
                 p("The cycle is broken! :D", cond=randint(1, 100000), value=2 / 100000)
                 self.remove_from_list(self.movie_data, pick, watched_movies_list)
-                self.file_watched.write(f"{pick_movie} | {pick_suggested_by}\n")  # ;Save the watched movie with whom suggested it in a file for referrence
+                self.file_watched.write(f"{pick_movie} | {pick_suggested_by} <{datetime.now().strftime('%Y-%m-%d %I:%M %p')}>\n")  # ;Save the watched movie with whom suggested it in a file for referrence
                 p(f"\nMovies watched: {len(watched_movies_list)}\nWatched Movies: {watched_movies_list}\nMovie List: {self.movie_data}\n")  # ;Shows current information
                 p(f"Saving Suggestion counters to {self.filename[:self.filename.index('.')]}_user_suggestion.txt")
                 self.save_to_counter_file_from_list(usernames, unknown_users)
+                self.file_watched.close()
+                self.fill_end_date()
                 break
 
             self.list_data(search="dbg_data", use_alt_list=True)
 
             self.remove_from_list(self.movie_data, pick, watched_movies_list)
-            self.file_watched.write(f"{pick_movie} | {pick_suggested_by}\n")  # ;Save the watched movie with whom suggested it in a file for referrence
+            self.file_watched.write(f"{pick_movie} | {pick_suggested_by} <{datetime.now().strftime('%Y-%m-%d %I:%M %p')}>\n")  # ;Save the watched movie with whom suggested it in a file for referrence
             p(f"\nMovies watched: {len(watched_movies_list)}\n\nWatched Movies: {watched_movies_list}\n\nMovie List: {self.movie_data}\n")  # ;Shows current information
             p("-------------------------------------------------")
 
             if len(self.movie_data) == 0:
                 p(f"Show List is empty\nSaving Suggestion counters to {self.filename[:self.filename.index('.')]}_user_suggestion.txt")
                 self.save_to_counter_file_from_list(usernames, unknown_users)
+                self.fill_end_date()
                 break
-
-movies = MovieNight("Movies.txt")
-movies.roll_dice()
