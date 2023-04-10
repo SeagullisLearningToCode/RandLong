@@ -1,4 +1,4 @@
-# ;Version 3
+# ;Version 3.1
 from PF import *
 
 class ShowTime:
@@ -50,8 +50,8 @@ class ShowTime:
 
     def remove_from_list(self, refer, var, svar):
         # CODE
-        svar.append(var) # ;Puts referred var in a list
-        refer.remove(var) # ;Removes the var from the list
+        svar.append(var)  # ;Puts referred var in a list
+        refer.remove(var)  # ;Removes the var from the list
 
     def list_data(self, **options):
         # OPTIONS
@@ -104,31 +104,32 @@ class ShowTime:
         self.file_user_suggested.close()
 
     def fill_end_date(self):
-        with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "r+t") as history_file:
-            history_file.seek(0)
-            history = history_file.read().split("\n") # ;("==========================")
+        with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "r") as history_file:
+            history_data = history_file.read()
+            history = history_data.split("\n")
             lnRepo = {}
             endDateRepo = []
-            lc = 0 # ;Character Count
-            ln = 0 # ;Line Number
+            lc = 0  # ;Character Count
+            ln = 0  # ;Line Number
             isTimeDataDone = False
             for a in range(len(history)):
                 current_info = {}
-                lc += len(str(history[a]+"\n").encode("utf-8"))
-                isOldVersion = False # ;True when the items contain usernames and movie only
-                if not a+4 >= len(history):
+                lc += len(str(history[a] + "\n").encode("utf-8"))
+                isOldVersion = False  # ;True when the items contain usernames and movie only
+                if not a + 4 >= len(history):
                     if history[a] == "==========================":
-                        if history[a+2] == "==========================" or history[a+1].__contains__("Start Date"):
-                            start_data = history[a:a+3]
+                        if history[a + 2] == "==========================" or history[a + 1].__contains__("Start Date"):
+                            start_data = history[a:a + 3]
                             date = start_data[1]
                             date_name = ""
-                            if history[a+1].__contains__("Start Date: "):
-                                start_data = history[a:a+4]
-                                start_date_location = lc+len(start_data[1])
-                                end_date_location = lc+len(start_data[1]+start_data[2])
-                                end_date_location_ln = ln
+                            if history[a + 1].__contains__("Start Date: "):
+                                start_data = history[a:a + 4]
+                                start_date_location = lc + len(start_data[1])
+                                start_date_location_list = ln+1
+                                end_date_location = lc + len(start_data[1] + start_data[2])
+                                end_date_location_list = ln+2
                                 for date_dat in range(len(date[len("Start Date: "):])):
-                                    date_dat_l = date[len("Start Date: ")+date_dat]
+                                    date_dat_l = date[len("Start Date: ") + date_dat]
                                     if date_dat_l == "-":
                                         date_name += "_"
                                     elif date_dat_l == ":":
@@ -137,7 +138,8 @@ class ShowTime:
                                         date_name += "-"
                                     else:
                                         date_name += date_dat_l
-                                current_info.update({"location": [lc, start_date_location, end_date_location, ln], "isOld": isOldVersion, "suggestions": []})
+                                # ;                               0   1                    2                         3                  4                       5
+                                current_info.update({"location": [lc, start_date_location, start_date_location_list, end_date_location, end_date_location_list, ln], "isOld": isOldVersion, "suggestions": []})
                                 endDateRepo.append(current_info["location"][2])
                             else:
                                 isOldVersion = True
@@ -151,7 +153,7 @@ class ShowTime:
                                         date_name += "-"
                                     else:
                                         date_name += date_dat_l
-                                current_info.update({"location": [lc, lc+len(date)], "isOld": isOldVersion, "suggestions": []})
+                                current_info.update({"location": [lc, lc + len(date)], "isOld": isOldVersion, "suggestions": []})
                             lnRepo.update({date_name: current_info})
                             isTimeDataDone = True
                     elif history[a].__contains__("|") and isTimeDataDone:
@@ -161,9 +163,13 @@ class ShowTime:
                         elif "suggestions" in lnRepo[date_name].keys():
                             lnRepo[date_name]["suggestions"].append(history[a])
                     ln += 1
-            history_file.seek(endDateRepo[-1])
-            history_file.writelines(f": {datetime.now().strftime('%Y-%m-%d %I:%M %p')}\n")
-    
+            history[lnRepo[date_name]["location"][4]] += f" {datetime.now().strftime('%Y-%m-%d %I:%M %p')}"
+            lnRepo[date_name].update({"endDate": datetime.now().strftime('%Y-%m-%d %I:%M %p')})
+            with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "w+") as history_file:
+                p(history)
+                for data in history:
+                    history_file.write(data+"\n")
+
     def run(self):
         # LIST
         watched_shows_list = []  # ; Finished movies list
@@ -218,6 +224,7 @@ class ShowTime:
                 self.fill_end_date()
                 break
 
+
 # ;ShowTime("Shows.txt").run()
 
 class MovieNight:
@@ -257,7 +264,7 @@ class MovieNight:
         else:
             self.file_user_suggested = open(f"{file[:file.index('.')]}_user_suggestion.txt", "w+")
             p(f"Created '{file[:file.index('.')]}_user_suggestion.txt'")
-        self.file_watched.write(f"\n==========================\nStart Date: {self.run_date}\nEnd Date:\n==============================================\n")
+        self.file_watched.write(f"\n==========================\nStart Date: {self.run_date}\nEnd Date:\n==========================\n")
 
         for suggestion in self.contents:
             if suggestion in ["", "\n", " "]:
@@ -291,33 +298,34 @@ class MovieNight:
                             else:
                                 p(f"\t|\t{list_data}: {vars(self)[list_data]}")
             p("\t---------------------------------------------\n-------------------------------------------------")
-    
+
     def fill_end_date(self):
-        with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "r+t") as history_file:
-            history_file.seek(0)
-            history = history_file.read().split("\n") # ;("==========================")
+        with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "r") as history_file:
+            history_data = history_file.read()
+            history = history_data.split("\n")
             lnRepo = {}
             endDateRepo = []
-            lc = 0 # ;Character Count
-            ln = 0 # ;Line Number
+            lc = 0  # ;Character Count
+            ln = 0  # ;Line Number
             isTimeDataDone = False
             for a in range(len(history)):
                 current_info = {}
-                lc += len(str(history[a]+"\n").encode("utf-8"))
-                isOldVersion = False # ;True when the items contain usernames and movie only
-                if not a+4 >= len(history):
+                lc += len(str(history[a] + "\n").encode("utf-8"))
+                isOldVersion = False  # ;True when the items contain usernames and movie only
+                if not a + 4 >= len(history):
                     if history[a] == "==========================":
-                        if history[a+2] == "==========================" or history[a+1].__contains__("Start Date"):
-                            start_data = history[a:a+3]
+                        if history[a + 2] == "==========================" or history[a + 1].__contains__("Start Date"):
+                            start_data = history[a:a + 3]
                             date = start_data[1]
                             date_name = ""
-                            if history[a+1].__contains__("Start Date: "):
-                                start_data = history[a:a+4]
-                                start_date_location = lc+len(start_data[1])
-                                end_date_location = lc+len(start_data[1]+start_data[2])
-                                end_date_location_ln = ln
+                            if history[a + 1].__contains__("Start Date: "):
+                                start_data = history[a:a + 4]
+                                start_date_location = lc + len(start_data[1])
+                                start_date_location_list = ln+1
+                                end_date_location = lc + len(start_data[1] + start_data[2])
+                                end_date_location_list = ln+2
                                 for date_dat in range(len(date[len("Start Date: "):])):
-                                    date_dat_l = date[len("Start Date: ")+date_dat]
+                                    date_dat_l = date[len("Start Date: ") + date_dat]
                                     if date_dat_l == "-":
                                         date_name += "_"
                                     elif date_dat_l == ":":
@@ -326,7 +334,8 @@ class MovieNight:
                                         date_name += "-"
                                     else:
                                         date_name += date_dat_l
-                                current_info.update({"location": [lc, start_date_location, end_date_location, ln], "isOld": isOldVersion, "suggestions": []})
+                                # ;                               0   1                    2                         3                  4                       5
+                                current_info.update({"location": [lc, start_date_location, start_date_location_list, end_date_location, end_date_location_list, ln], "isOld": isOldVersion, "suggestions": []})
                                 endDateRepo.append(current_info["location"][2])
                             else:
                                 isOldVersion = True
@@ -340,7 +349,7 @@ class MovieNight:
                                         date_name += "-"
                                     else:
                                         date_name += date_dat_l
-                                current_info.update({"location": [lc, lc+len(date)], "isOld": isOldVersion, "suggestions": []})
+                                current_info.update({"location": [lc, lc + len(date)], "isOld": isOldVersion, "suggestions": []})
                             lnRepo.update({date_name: current_info})
                             isTimeDataDone = True
                     elif history[a].__contains__("|") and isTimeDataDone:
@@ -350,8 +359,12 @@ class MovieNight:
                         elif "suggestions" in lnRepo[date_name].keys():
                             lnRepo[date_name]["suggestions"].append(history[a])
                     ln += 1
-            history_file.seek(endDateRepo[-1])
-            history_file.writelines(f": {datetime.now().strftime('%Y-%m-%d %I:%M %p')}\n")
+            history[lnRepo[date_name]["location"][4]] += f" {datetime.now().strftime('%Y-%m-%d %I:%M %p')}"
+            lnRepo[date_name].update({"endDate": datetime.now().strftime('%Y-%m-%d %I:%M %p')})
+            with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "w+") as history_file:
+                p(history)
+                for data in history:
+                    history_file.write(data+"\n")
 
     def save_to_counter_file_from_list(self, main_list, main_list_unknowns):
         # CODE
@@ -381,7 +394,6 @@ class MovieNight:
         self.file.close()
         self.file_watched.close()
         self.file_user_suggested.close()
-    
 
     def roll_dice(self):
         # LIST
@@ -439,3 +451,4 @@ class MovieNight:
                 self.save_to_counter_file_from_list(usernames, unknown_users)
                 self.fill_end_date()
                 break
+
