@@ -8,7 +8,7 @@ P     A   A N   N D   D A   A     F     R R   A   A M   M E     WW WW O   O R R 
 P     A   A N   N D   D A   A     F     R  R  A   A M   M E     WW WW O   O R  R  K  K
 P     A   A N   N DDDD  A   A     F     R   R A   A M   M EEEEE W   W  OOO  R   R K   K
 ========================================================================================
-                                                                    Version: 1.6d Angry Ailurus
+                                                                    Version: 1.7 Angry Ailurus
 
 Gull Framework without Pygame!
 This file stores very simple functions with the sole purpose of de-bloating the Main.py file (used to be)
@@ -33,7 +33,8 @@ except ImportError as ie:
 # ;VARIABLES-------------------------------------------------------------------------------------------------------------------
 
 # ;PANDA FRAMEWORK
-GF_VERSION = "1.6d Angry Ailurus"
+GF_VERSION = "1.7 Angry Ailurus"
+GF_EDITION = "Panda"
 GF_FILENAME = str(__file__)
 # ;Today's Date
 td = date.today()
@@ -51,18 +52,22 @@ GF_XTN_FOLDER_PATH = f"{GF_FILE_PATH}/EXT/"
 # ;PRINT BASED FUNCTIONS
 # ;============================================================================================================================
 
-def p(t="passed", **kwargs):
+def p(t=f"passed {choice(['Record Player', 'Gameboy', 'Tea'])}", **kwargs):
     """
-    Print
     Make print statements faster than python's print("Hello World")
 
     kwargs
     --------------------
     condition(Bool) Def: None
-            |_____Prints statement if refrenced Boolean is True
+            |_____Prints statement if refrenced Boolean is True, unless you use 'value'
+    value(Bool) Def: Conditional
+        |_____Defaults to True if 'condition' is passed, unless you change this argument to false
 
-    Example: p("Hello World")
-    Output: Hello World
+    Examples
+
+    p("Hello World") <-- Prints "Hello World"\n
+    p(cond=False, value=True) <-- Prints default value if False is True\n
+    p("Hello World", cond="Tea", compare='c', value="Record Player) <-- Prints "Hello World" if Tea has Record Player is in the word Tea\n
     """
     # KWARGS
     condition = kwargs.get("cond", None)
@@ -77,17 +82,82 @@ def p(t="passed", **kwargs):
         elif type(condition) is str:
             changeCValue = kwargs.get("value", "Hello, Gull!")
     if type(condition) is bool and type(changeCValue) is bool:
-        if condition is changeCValue:
+        # ; e = equal
+        # ; ne = not equal
+        compare_int = kwargs.get("compare", "e") # ;Equals to (if condition == value)
+        if compare_int == "ne":
+            if condition is not changeCValue:
+                print(t)
+        elif condition is changeCValue:
             print(t)
     elif type(condition) is int and type(changeCValue) is int:
-        if condition == changeCValue:
-            print(t)
+        # ; e = equals
+        # ; gt = Greater than
+        # ; gte = Greater than or Equals to
+        # ; lt = Less than
+        # ; lte = Less than or Equals to
+        # ; ne = Not equal to
+        compare_int = kwargs.get("compare", "e") # ;Equals to (if condition == value)
+        if compare_int == "e":
+            if condition == changeCValue:
+                print(t)
+        elif compare_int == "gt":
+            if condition > changeCValue:
+                print(t)
+        elif compare_int == "gte":
+            if condition >= changeCValue:
+                print(t)
+        elif compare_int == "lt":
+            if condition < changeCValue:
+                print(t)
+        elif compare_int == "lte":
+            if condition <= changeCValue:
+                print(t)
+        elif compare_int == "ne":
+            if condition != changeCValue:
+                print(t)
     elif type(condition) is float and type(changeCValue) is float:
-        if condition == changeCValue:
-            print(t)
+        # ; e = equals
+        # ; gt = Greater than
+        # ; gte = Greater than or Equals to
+        # ; lt = Less than
+        # ; lte = Less than or Equals to
+        # ; ne = Not equal to
+        compare_int = kwargs.get("compare", "e") # ;Equals to (if condition == value)
+        if compare_int == "e":
+            if condition == changeCValue:
+                print(t)
+        elif compare_int == "gt":
+            if condition > changeCValue:
+                print(t)
+        elif compare_int == "gte":
+            if condition >= changeCValue:
+                print(t)
+        elif compare_int == "lt":
+            if condition < changeCValue:
+                print(t)
+        elif compare_int == "lte":
+            if condition <= changeCValue:
+                print(t)
+        elif compare_int == "ne":
+            if condition != changeCValue:
+                print(t)
+        # ;if condition == changeCValue:
+        # ;    print(t)
     elif type(condition) is str and type(changeCValue) is str:
-        if condition == changeCValue:
-            print(t)
+        # ; e = equal
+        # ; ne = not equal
+        # ; c = contains
+        compare_int = kwargs.get("compare", "e") # ;Equals to (if condition == value)
+        if compare_int == "e":
+            if condition == changeCValue:
+                print(t)
+        elif compare_int == "ne":
+            if condition != changeCValue:
+                print(t)
+        elif compare_int == "c":
+            if condition.__contains__(changeCValue):
+                print(t)
     if condition is None:
         print(t)
 
@@ -124,7 +194,7 @@ def sps(t: str, **sargs):
                 else:
                     p(f"{replacePassed} {t}")
         elif type(addCond) is bool:
-            if addCond is True:
+            if addCond:
                 if replacePassed.__contains__(replacePassedCMDS[0]):
                     p(f"{replacePassed[len(replacePassedCMDS[0]):]}<{tt}> {t}")
                 elif replacePassed.__contains__(replacePassedCMDS[1]):
@@ -137,11 +207,11 @@ def sps(t: str, **sargs):
             allAreTrue = False
             counter = 0
             for boolVar in addCond:
-                if boolVar is True:
+                if boolVar:
                     counter += 1
             if counter >= len(addCond):
                 allAreTrue = True
-            if allAreTrue is True:
+            if allAreTrue:
                 if replacePassed.__contains__(replacePassedCMDS[0]):
                     p(f"{replacePassed[len(replacePassedCMDS[0]):]}<{tt}> {t}")
                 elif replacePassed.__contains__(replacePassedCMDS[1]):
@@ -159,73 +229,130 @@ def sps(t: str, **sargs):
         p(f"passed {t}")
 
 
-def makeBox(what: str, **mdbk):
-    '''
+def makeBox(t: str, **kwargs):
+    """
+    From old version
+    ____________________________________________________
     Make a printable box with text inside of it
+    I may need to touch this up a bit to except newlines
+    but you know how this code is made
 
-    Rules: Can't use /n, in which breaks this function entirely
-    mdbk
-    ---------------------------------------------
-    condition(bool) Def: None
-            |_________Print If condition is True
-
-    :param what:
-    :param mdbk:
+    :param t:
+    :param kwargs:
     :return:
-    '''
+    """
+    # KWARGS
+    condition = kwargs.get("cond", None)
+    cmp = kwargs.get("compare", "e")
+    changeCValue = kwargs.get("value")
+    _return = kwargs.get("_return", False)
     # STR
-    ts = ""
+    output = ""
     # INT
-    c = genIterList(9)  # ;Counter (this plays a big role in this function)
-    gl = len(what)
-    # MDBK
-    condition = mdbk.get("cond", None)
+    new_line_count = len(t.split("\n"))
+    c = genIterList(9)
+    gl = len(t) # ; For compat.
+    # LIST
+    new_line_list = []
+    lines = [lol for lol in [len(l) for l in t.split("\n")]]
+    lines_writable = [x for x in range(new_line_count)]
+    lines_str = [ls for ls in t.split("\n")]
     # CODE
-    for i in range(len(what) + 4 * 100):
-        if c[0] == 0:
-            ts += " "
-        else:
-            if not c[0] >= gl + 3 and c[1] == 0:
-                ts += "-"
-            else:
-                if c[1] == 0:
-                    ts += "\n"
-                elif not c[1] == 1:
-                    if c[2] == 0:
-                        ts += "|"
-                    elif c[2] == 1:
-                        if not c[3] == 1:
-                            ts += " "
-                            c[3] += 1
+
+    if condition is not None:
+        if type(condition) is bool:
+            changeCValue = kwargs.get("value", True)
+        elif type(condition) is int:
+            changeCValue = kwargs.get("value", 0)
+        elif type(condition) is float:
+            changeCValue = kwargs.get("value", float(0))
+        elif type(condition) is str:
+            changeCValue = kwargs.get("value", "Hello, Gull!")
+
+    if t.__contains__("\n"):
+        for l in range(new_line_count+2):
+            new_line_list.append("")
+        biggest_line = lines.index(max(lines)) # ; Accuratly determine what is the biggest line
+        for i in range(len(new_line_list)): # ;here we go
+            for n in range(len(new_line_list)):
+                if n in [0, len(new_line_list)-1] and c[0] != 1:
+                    for d in range(lines[biggest_line]+2): # ; Grab the largest line, this line builds the top line
+                        if d == lines[biggest_line]+2:
+                            pass
                         else:
-                            if not c[4] >= gl and c[2] == 1:
-                                ts += what[c[4]]
-                            c[4] += 1
-                            if c[4] >= gl and c[2] == 1 and c[5] == 0:
-                                if c[6] == 0:
-                                    ts += " "
-                                    c[6] += 1
-                                if c[6] == 1:
-                                    ts += "|"
-                                    c[6] += 1
-                                if c[6] == 2:
-                                    ts += "\n"
-                                    c[5] += 1
-                    elif c[2] >= 2:
-                        if c[7] == 0:
-                            ts += " "
-                        elif not c[7] >= gl + 3 and not c[8] == 1:
-                            ts += "-"
-                        elif c[7] >= gl + 3:
-                            break
-                        c[7] += 1
-                    if not c[2] == 1:
-                        c[2] += 1
-                    elif c[5] == 1 and not c[2] == 2:
-                        c[2] += 1
-                c[1] += 1
-        c[0] += 1
-    p(ts, cond=condition)
+                            if d == 0:
+                                new_line_list[n] += " "
+                            new_line_list[n] += "-"
+                        c[3] = len(new_line_list[n])
+                    if n == len(new_line_list)-1:
+                        c[0] = 1
+                elif c[1] != 1 and c[0] == 1:
+                    for line in lines_writable:
+                        new_line_list[line+1] = f"| {lines_str[line]}"
+                        if c[2] != 1:
+                            for add_space in range(len(lines_str[biggest_line][len(lines_str[line]):])+1):
+                                if add_space != len(lines_str[biggest_line][len(lines_str[line]):]):
+                                    new_line_list[line+1] += " "
+                                else:
+                                    new_line_list[line+1] += " |"
+                            c[2] = 1
+                        else:
+                            for add_space in range(c[3]-len(f"| {lines_str[line]}")):
+                                if add_space != c[3]-len(f"| {lines_str[line]}")-1:
+                                    new_line_list[line+1] += " "
+                                else:
+                                    new_line_list[line+1] += " |"
+                    c[1] = 1
+                elif c[1] == 1:
+                    break
+        for line in new_line_list:
+            output += line+"\n"
+    else:
+        for i in range(len(t) + 4 * 100):
+            if c[0] == 0:
+                output += " "
+            else:
+                if not c[0] >= gl + 3 and c[1] == 0:
+                    output += "-"
+                else:
+                    if c[1] == 0:
+                        output += "\n"
+                    elif not c[1] == 1:
+                        if c[2] == 0:
+                            output += "|"
+                        elif c[2] == 1:
+                            if not c[3] == 1:
+                                output += " "
+                                c[3] += 1
+                            else:
+                                if not c[4] >= gl and c[2] == 1:
+                                    output += t[c[4]]
+                                c[4] += 1
+                                if c[4] >= gl and c[2] == 1 and c[5] == 0:
+                                    if c[6] == 0:
+                                        output += " "
+                                        c[6] += 1
+                                    if c[6] == 1:
+                                        output += "|"
+                                        c[6] += 1
+                                    if c[6] == 2:
+                                        output += "\n"
+                                        c[5] += 1
+                        elif c[2] >= 2:
+                            if c[7] == 0:
+                                output += " "
+                            elif not c[7] >= gl + 3 and not c[8] == 1:
+                                output += "-"
+                            elif c[7] >= gl + 3:
+                                break
+                            c[7] += 1
+                        if not c[2] == 1:
+                            c[2] += 1
+                        elif c[5] == 1 and not c[2] == 2:
+                            c[2] += 1
+                    c[1] += 1
+            c[0] += 1
+    p(output, cond=condition, compare=cmp, value=changeCValue)
 
 
 def flp(l: dict, **kwargs):
@@ -260,7 +387,7 @@ def flp(l: dict, **kwargs):
     if add is not None and type(add) is str:
         if add.__contains__(additionsCommander[2]):
             additionsCommanderCounter = 0
-    if returnValue is True:
+    if returnValue:
         rv = ""
 
     if type(l) is dict:
@@ -276,7 +403,7 @@ def flp(l: dict, **kwargs):
                 else:
                     p(f"{key}: {l.get(key)} {add}")
             else:
-                if returnValue is True:
+                if returnValue:
                     rv += f"{key}: {l.get(key)}\n"
                 p(f"{key}: {l.get(key)}")
     elif type(l) is list:
@@ -291,10 +418,10 @@ def flp(l: dict, **kwargs):
                     p(f"{value} {add}", cond=cond)
             else:
                 rv = ""
-                if returnValue is True:
+                if returnValue:
                     rv += f"{value}\n"
                 p(value, cond=cond)
-    if returnValue is True:
+    if returnValue:
         return rv
 
 # ;============================================================================================================================
@@ -329,16 +456,15 @@ def getPresSpec(file: str, **kwargs):
     # OSPATH
     getpres = os.path.exists
     # CODE
-    if GPS_SILENT_MODE is not True:
+    if GPS_SILENT_MODE is False:
         p(f"{getpres(file)} This file/folder already exists", cond=GPS_RETURN_EXIST)
-    if GPS_CREATE_FOLDER is True:
+    if GPS_CREATE_FOLDER:
         if getpres(file) is False:
             if GPS_RETURN_EXIST is False:
                 p(f"Making File/Folder:\n\t\t{file}", cond=GPS_SILENT_MODE, value=False)
             os.makedirs(file)
-        else:
-            if GPS_RETURN_EXIST is False:
-                p(f"Folder already exists:\n\t\t{file}", cond=GPS_SILENT_MODE, value=False)
+        elif GPS_RETURN_EXIST is False:
+            p(f"Folder already exists:\n\t\t{file}", cond=GPS_SILENT_MODE, value=False)
     return getpres(file)
 
 
@@ -444,7 +570,7 @@ def getDir(targetpath: str, **kwargs):
                 if type(GD_FILTER) is str:
                     if file.__contains__(GD_FILTER):  # ;if filename contains a word, number or file type
                         counter += 1
-                        if GD_ALSO_INCLUDE_FILENAME is True:
+                        if GD_ALSO_INCLUDE_FILENAME:
                             d.update({counter: [targetpath + file, file[:-len(file_extension_finder(file))]]})
                         else:
                             d.update({counter: targetpath + file})
@@ -453,7 +579,7 @@ def getDir(targetpath: str, **kwargs):
                     p(onlyExt, cond=GD_DEBUG)
                     if onlyExt in GD_FILTER:
                         counter += 1
-                        if GD_ALSO_INCLUDE_FILENAME is True:
+                        if GD_ALSO_INCLUDE_FILENAME:
                             d.update({counter: [targetpath + file, file[:-len(file_extension_finder(file))]]})
                             mi.append(counter)
                         else:
@@ -464,11 +590,11 @@ def getDir(targetpath: str, **kwargs):
                 sys.exit(2)
         else:
             counter += 1
-            if GD_ALSO_INCLUDE_FILENAME is True:
+            if GD_ALSO_INCLUDE_FILENAME:
                 d.update({counter: [targetpath + file, file[:-len(file_extension_finder(file))]]})
             else:
                 d.update({counter: targetpath + file})
-    if GD_PRINT_DICT is True:
+    if GD_PRINT_DICT:
         flp(d)
         if len(nmi) != 0:
             p(f"--------------------\n\tMissing\n--------------------")
@@ -524,7 +650,7 @@ def bubble(var: list, start: int, stop:int, **bo):
     # INT
     a = start
     # CODE
-    if bo_copy is True:
+    if bo_copy:
         new_list = var.copy()
         for i in range(len(new_list)):
             if i >= start:
@@ -542,7 +668,7 @@ def bubble(var: list, start: int, stop:int, **bo):
                 var.pop(a)
             if i >= stop:
                 break
-        if bo_strip_it is True:
+        if bo_strip_it:
             if len(var) == 1:
                 return var[0]
         else:
@@ -664,14 +790,14 @@ def boolRandom(**brargs):
     bL = [False, True]
     genList = []
     # code
-    if count is True:
+    if count:
         counters = genIterList(2)
     for var in range(generateBools):
-        if count is True:
+        if count:
             value = choice(bL)
-            if value is True:
+            if value:
                 counters[1] += 1
-            if value is False:
+            if value:
                 counters[0] += 1
             genList.append(value)
         else:
@@ -683,9 +809,9 @@ def boolRandom(**brargs):
     for plays in range(rollDice):
         chose = choice(genList)
 
-    p(f"Gull has chosen {chose}", cond=printResult)
+    p(chose, cond=printResult)
 
-    if count is True:
+    if count:
         if counters[0] > counters[1]:
             p(f"\nFalse: {counters[0]}\nTrue: {counters[1]}\nThere is more of False values in the list than True values\n")
         elif counters[1] > counters[0]:
@@ -735,7 +861,7 @@ def rollDice(target, rolls, **rda):
             for roll in range(rolls):
                 result = choice(l)
     p(result, cond=printResult)
-    if targetNotList is True:
+    if targetNotList:
         p(l, cond=showList)
     return result
 
@@ -759,16 +885,85 @@ def sysDetect(**sdopt):
     printResult = sdopt.get("getResults", False)
     # code
     p("Detecting Operating System and Hardware...")
-    compinfo = {
-        "Machine".lower(): pt.machine(),
-        "System".lower(): pt.system(),
-        "OS".lower(): pt.platform(),
-        "CPU".lower(): pt.processor(),
-        "Username".lower(): gp.getuser(),
-    }
-    if printResult is True:
-        flp(compinfo)
-
+    if sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
+        extra_info = [info for info in os.environ]
+        compinfo = {
+            # ;Hardware
+            "Machine".lower(): pt.machine(),
+            "CPU".lower(): pt.processor(),
+            # ;Software
+            "System".lower(): pt.system(),
+            "Version".lower(): f"Short: {pt.release()}, Full: {pt.platform()}",
+            "Edition".lower(): pt.win32_edition(),
+            # ;"DE".lower(): os.environ.get("desktop_session".upper()),
+            # ;User
+            "Username".lower(): gp.getuser(),
+            # ;Python
+            "Python_Build".lower(): pt.python_build(),
+            "Python_Compiler".lower(): pt.python_compiler(),
+            "Python_Release".lower(): pt.python_branch(),
+            "Python_Version".lower(): pt.python_version(),
+            # ;Gull Framework
+            "Gull_Framework_Version".lower(): GF_VERSION,
+            "Gull_Framework_Edition".lower(): GF_EDITION
+        }
+    elif sys.platform.startswith("darwin"):
+        extra_info = [info for info in os.uname()]
+        compinfo = {
+            # ;Hardware
+            "Machine".lower(): extra_info[4],
+            "CPU".lower(): pt.processor(),
+            # ;Software
+            "System".lower(): pt.mac_ver()[0],
+            "KernelVersion".lower(): extra_info[2],
+            "KernalVersionExtended".lower(): extra_info[3],
+            "DE".lower(): "Aqua",
+            # ;User
+            "NodeName".lower(): extra_info[1],
+            "Username".lower(): gp.getuser(),
+            # ;Python
+            "Python_Build".lower(): pt.python_build(),
+            "Python_Compiler".lower(): pt.python_compiler(),
+            "Python_Release".lower(): pt.python_branch(),
+            "Python_Version".lower(): pt.python_version(),
+            # ;Gull Framework
+            "Gull_Framework_Version".lower(): GF_VERSION,
+            "Gull_Framework_Edition".lower(): GF_EDITION
+        }
+    else:
+        extra_info = [info for info in os.uname()]
+        compinfo = {
+            # ;Hardware
+            "Machine".lower(): extra_info[4],
+            "CPU".lower(): pt.processor(),
+            # ;Software
+            "System".lower(): extra_info[0],
+            "KernelVersion".lower(): extra_info[2],
+            "Distro".lower(): extra_info[3],
+            "DE".lower(): os.environ.get("desktop_session".upper()),
+            # ;User
+            "NodeName".lower(): extra_info[1],
+            "Username".lower(): gp.getuser(),
+            # ;Python
+            "Python_Build".lower(): pt.python_build(),
+            "Python_Compiler".lower(): pt.python_compiler(),
+            "Python_Release".lower(): pt.python_branch(),
+            "Python_Version".lower(): pt.python_version(),
+            # ;Gull Framework
+            "Gull_Framework_Version".lower(): GF_VERSION,
+            "Gull_Framework_Edition".lower(): GF_EDITION
+        }
+    # ;else:
+    # ;    compinfo = {
+    # ;        # ;Hardware
+    # ;        "Machine".lower(): pt.machine(),
+    # ;        "CPU".lower(): pt.processor(),
+    # ;        # ;Software
+    # ;        "System".lower(): pt.system(),
+    # ;        "OS".lower(): pt.platform(),
+    # ;        # ;User
+    # ;        "Username".lower(): gp.getuser(),
+    # ;    }
     return compinfo
 
 # ;============================================================================================================================
@@ -798,7 +993,7 @@ def find_text(s: str, file: str, **fto):
     with open(file, "r+") as f:  # ;f is for file
         d = f.read()  # ; d as in data
         f.close()
-        if fto_return_length is True:
+        if fto_return_length:
             return [d.find(s), d.find(s) + string_length] # ;Returns a list of the beginning indice and the end indice instead of a string
         else:
             return d[d.find(s):d.find(s) + string_length]  # ;Return searched string
@@ -825,7 +1020,7 @@ def backup_file(file, **bfo):
             backup.close()
     else:
         backup_file_save_to_include_backup_folder = bfo.get("make_backup_folder", False)
-        if backup_file_save_to_include_backup_folder is True:
+        if backup_file_save_to_include_backup_folder:
             os.makedirs(f"{backup_file_save_to}/{backup_file_name}")
             with open(f"{backup_file_save_to}/{backup_file_name}/{file}", "w+") as backup:
                 with open(file, "r") as f:
@@ -870,7 +1065,7 @@ def backup_project(**bpo):
                 backup.close()
     else:
         backup_project_save_to_include_backup_folder = bpo.get("make_backup_folder", False)
-        if backup_project_save_to_include_backup_folder is True:
+        if backup_project_save_to_include_backup_folder:
             os.makedirs(f"{backup_project_save_to}/{backup_file_name}")
             for file in [files_to_backup[f] for f in files_to_backup]:
                 with open(f"Backup/{backup_file_name}/{file.split(['/'])[-1]}", "w+") as backup:
@@ -960,7 +1155,7 @@ class GF_DEVLOG:
             raise ValueError
         os.makedirs(f"/Users/{self.gun}{self.fp}")
         what = open(f"/Users/{self.gun}{self.fp}{self.tf}{str(what)}", "w+")
-        if self.ise is True:
+        if self.ise:
             if os.path.getsize(f"/Users/{self.gun}{self.fp}/{self.tf}") >= self.lfs:
                 what.close()
         else:
@@ -998,7 +1193,7 @@ class GF_WRITE_SETTING_FILES:
         newfile = open(f"{getdir}{name}.ini", "w+")  # Creates new file
         newfile.close()
 
-        if WSF_RETURN_FILEPATH is True:
+        if WSF_RETURN_FILEPATH:
             path_name = f"{getdir}{n}.ini"
             p(path_name)
             return path_name
@@ -1034,8 +1229,8 @@ class GF_INIT:
         self.no_start_print = kwargs.get("no_print", False) # ;Shhhhhhhh quiet \/
         #   CODE
         p(f"\nPanda Framework v: {GF_VERSION}\n\tCode: https://github.com/SeagullisLearningToCode/Gull-Framework\n\tNOTE: No repo is avalible as of this version of PF, it will soon be added\n------------------------------------------------------------------------------------------------------------", cond=self.no_start_print, value=False)
-        if self.init_all_classes is True:
-            if self.enable_assembly_mode is True:
+        if self.init_all_classes:
+            if self.enable_assembly_mode:
                 self.dl = GF_DEVLOG()
                 self.wsf = GF_WRITE_SETTING_FILES()
                 self.cl = GF_MATH_CONVERT_FROM_LIST()
@@ -1045,7 +1240,7 @@ class GF_INIT:
                 self.set = GF_WRITE_SETTING_FILES()
                 self.convert = GF_MATH_CONVERT_FROM_LIST()
                 self.getFileInfo = GF_GET_FILE_INFO()
-        if self.enable_assembly_mode is True and self.init_all_classes is False:  # ;gives it somewhat of an assembly feel
+        if self.enable_assembly_mode and self.init_all_classes is False:  # ;gives it somewhat of an assembly feel
             self.dl = GF_DEVLOG  # ;Logs stuff
             self.wsf = GF_WRITE_SETTING_FILES  # ;Writes INI files
             self.cl = GF_MATH_CONVERT_FROM_LIST  # ;Deals with converting lists/dicts to differnt types of values inside them
