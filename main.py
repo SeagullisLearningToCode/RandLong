@@ -1,5 +1,8 @@
-# ;Version 3.1
+# ;Version 3.2
+import os.path
+
 from PF import *
+
 
 class ShowTime:
     """
@@ -20,6 +23,7 @@ class ShowTime:
         self.show_data_len = 0
         # LIST
         self.show_data = []
+        self.priority_users = []  # ;Priority Users mainly can call <MUST>
         self.contents = self.file.read().split("\n")
         # DICT
         self.dbg_data = {}
@@ -39,11 +43,17 @@ class ShowTime:
             self.file_user_suggested = open(f"{file[:file.index('.')]}_user_suggestion.txt", "w+")
             p(f"Created '{file[:file.index('.')]}_user_suggestion.txt'")
         self.file_watched.write(f"\n==========================\nStart Date: {self.run_date}\nEnd Date:\n==============================================\n")
+        if os.path.exists("priority_users.txt"):
+            self.priority_file = open(f"priority_users.txt", "r")
+            for user in self.priority_file.read().split("\n"):
+                if user != "":
+                    self.priority_users.append(user)
+            self.priority_file.close()
+        else:
+            self.priority_file = open(f"priority_users.txt", "w+").close()
 
         for suggestion in self.contents:
-            if suggestion in ["", "\n", " "]:
-                pass
-            else:
+            if suggestion not in ["", "\n", " "]:
                 data = suggestion.split(" | ")
                 self.show_data.append([data[0], data[1]])
                 self.show_data_len += 1
@@ -125,9 +135,9 @@ class ShowTime:
                             if history[a + 1].__contains__("Start Date: "):
                                 start_data = history[a:a + 4]
                                 start_date_location = lc + len(start_data[1])
-                                start_date_location_list = ln+1
+                                start_date_location_list = ln + 1
                                 end_date_location = lc + len(start_data[1] + start_data[2])
-                                end_date_location_list = ln+2
+                                end_date_location_list = ln + 2
                                 for date_dat in range(len(date[len("Start Date: "):])):
                                     date_dat_l = date[len("Start Date: ") + date_dat]
                                     if date_dat_l == "-":
@@ -166,9 +176,8 @@ class ShowTime:
             history[lnRepo[date_name]["location"][4]] += f" {datetime.now().strftime('%Y-%m-%d %I:%M %p')}"
             lnRepo[date_name].update({"endDate": datetime.now().strftime('%Y-%m-%d %I:%M %p')})
             with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "w+") as history_file:
-                p(history)
                 for data in history:
-                    history_file.write(data+"\n")
+                    history_file.write(data + "\n")
 
     def run(self):
         # LIST
@@ -185,9 +194,8 @@ class ShowTime:
                     "user_data_dict": user_data_dict,
                     "unknown_users": unknown_users
                 })
-            else:
-                if 'dbg_data' in vars(self).keys():
-                    del self.dbg_data  # ;Removes 'self.dbg_data' from this class since self.debug_mode isn't 1
+            elif 'dbg_data' in vars(self).keys():
+                del self.dbg_data  # ;Removes 'self.dbg_data' from this class since self.debug_mode isn't 1
 
             first = self.show_data[0]  # ;Points to the first thing on the list
             p(f"\nSeries: {first[0]}\nSuggested By: {first[1]}\n")  # ;Shows selected show/series with whom suggested it
@@ -225,8 +233,6 @@ class ShowTime:
                 break
 
 
-# ;ShowTime("Shows.txt").run()
-
 class MovieNight:
     """
     Optionals
@@ -239,6 +245,7 @@ class MovieNight:
     def __init__(self, file, **options):
         # OPTIONS
         self.debug_mode = options.get("debug_mode", 0)
+        self.debug_priority_users_autoskip_input = options.get("priority_users_autoskip_input", False)
         # FILE
         self.file = open(file, "r+")
         self.filename = file
@@ -246,19 +253,20 @@ class MovieNight:
         self.movie_data_len = 0
         # LIST
         self.movie_data = []
+        self.priority_users = []  # ;Priority Users mainly can call <MUST>
         self.contents = self.file.read().split("\n")
         # DICT
         self.dbg_data = {}
         # DATETIME
         self.run_date = f"{datetime.now().strftime('%Y-%m-%d %I:%M %p')}"
         # CODE
-        if os.path.exists(file) is True:
+        if os.path.exists(file):
             self.file_watched = open(f"{file[:file.index('.')]}_watched.txt", "a")
         else:
             self.file_watched = open(f"{file[:file.index('.')]}_watched.txt", "w+")
             p(f"Created {file}_watched.txt")
 
-        if os.path.exists(f"{file[:file.index('.')]}_user_suggestion.txt") is True:
+        if os.path.exists(f"{file[:file.index('.')]}_user_suggestion.txt"):
             self.file_user_suggested = open(f"{file[:file.index('.')]}_user_suggestion.txt", "r+")
             self.suggested_data = self.file_user_suggested.read().split("\n")
         else:
@@ -266,10 +274,17 @@ class MovieNight:
             p(f"Created '{file[:file.index('.')]}_user_suggestion.txt'")
         self.file_watched.write(f"\n==========================\nStart Date: {self.run_date}\nEnd Date:\n==========================\n")
 
+        if os.path.exists("priority_users.txt"):
+            self.priority_file = open(f"priority_users.txt", "r")
+            for user in self.priority_file.read().split("\n"):
+                if user != "":
+                    self.priority_users.append(user)
+            self.priority_file.close()
+        else:
+            self.priority_file = open(f"priority_users.txt", "w+").close()
+
         for suggestion in self.contents:
-            if suggestion in ["", "\n", " "]:
-                pass
-            else:
+            if suggestion not in ["", "\n", " "]:
                 data = suggestion.split(" | ")
                 self.movie_data.append([data[0], data[1]])
                 self.movie_data_len += 1
@@ -321,9 +336,9 @@ class MovieNight:
                             if history[a + 1].__contains__("Start Date: "):
                                 start_data = history[a:a + 4]
                                 start_date_location = lc + len(start_data[1])
-                                start_date_location_list = ln+1
+                                start_date_location_list = ln + 1
                                 end_date_location = lc + len(start_data[1] + start_data[2])
-                                end_date_location_list = ln+2
+                                end_date_location_list = ln + 2
                                 for date_dat in range(len(date[len("Start Date: "):])):
                                     date_dat_l = date[len("Start Date: ") + date_dat]
                                     if date_dat_l == "-":
@@ -362,9 +377,8 @@ class MovieNight:
             history[lnRepo[date_name]["location"][4]] += f" {datetime.now().strftime('%Y-%m-%d %I:%M %p')}"
             lnRepo[date_name].update({"endDate": datetime.now().strftime('%Y-%m-%d %I:%M %p')})
             with open(f"{self.filename[:self.filename.index('.')]}_watched.txt", "w+") as history_file:
-                p(history)
                 for data in history:
-                    history_file.write(data+"\n")
+                    history_file.write(data + "\n")
 
     def save_to_counter_file_from_list(self, main_list, main_list_unknowns):
         # CODE
@@ -400,9 +414,80 @@ class MovieNight:
         watched_movies_list = []  # ;Finished movies list
         usernames = []  # ;User list without counter (it's literally 'watched_movies_list' without the movie being added)
         unknown_users = []  # ;Names that aren't in the counter file go here
+        priority_failed_attempts = []
         # DICT
         user_data_dict = {}  # ;Counters
         # CODE
+        p("Checking for called priorities")
+        if len(self.priority_users) != 0:
+            for i in range(len(self.movie_data)+1): # ;Act as an updater, because there is a bug where it skips the next suggestion since that the suggestion got removed
+                for suggestion in self.movie_data:
+                    suggestion_s = suggestion[0].split("^")  # ; Splitted
+                    movie_raw = suggestion[0]
+                    user = suggestion[1]
+                    if user in self.priority_users:
+                        if len(suggestion_s) > 1:
+                            if suggestion_s[-1] == "":
+                                suggestion_s.pop(-1)
+                            flags = suggestion_s[1]
+                            movie = suggestion_s[0]
+                            if movie[-1].isspace():
+                                suggestion_s[0] = movie[:-1]
+                                movie = suggestion_s[0]
+                            if flags in ["PRIORITY", "MUST", "MUST_WATCH"] and movie_raw not in [x[0] for x in watched_movies_list]: # ;skips a suggestion that's already been looped over
+                                if self.debug_mode == 1:
+                                    self.dbg_data({
+                                        "watched_movies_list": watched_movies_list,
+                                        "usernames": usernames,
+                                        "user_data_dict": user_data_dict,
+                                        "unknown_users": unknown_users
+                                    })
+                                elif 'dbg_data' in vars(self).keys():
+                                    del self.dbg_data
+                                makeBox(f"Movie Picked: '{movie}'\nSuggested By: {user}")
+                                makeBox(f"Tagged as: {flags}")
+                                if self.debug_priority_users_autoskip_input is False:
+                                    command = input("Is movie done? ")
+                                else:
+                                    command = ""
+                                p("-------------------------------------------------")
+                                if user not in user_data_dict:
+                                    user_data_dict.update({user: 1})
+                                else:
+                                    user_data_dict[user] += 1
+                                usernames.append(user)
+                                if command in ["e", "E"]:  # ;If the input equals 'e', then start quit program sequence
+                                    p("The cycle is broken! :D", cond=randint(1, 100000), value=2 / 100000)
+                                    self.remove_from_list(self.movie_data, suggestion, watched_movies_list)
+                                    self.file_watched.write(f"{movie_raw} | {user} <{datetime.now().strftime('%Y-%m-%d %I:%M %p')}>\n")  # ;Save the watched movie with whom suggested it in a file for referrence
+                                    p(f"\nMovies watched: {len(watched_movies_list)}\nWatched Movies: {watched_movies_list}\nMovie List: {self.movie_data}\n")  # ;Shows current information
+                                    p(f"Saving Suggestion counters to {self.filename[:self.filename.index('.')]}_user_suggestion.txt")
+                                    self.save_to_counter_file_from_list(usernames, unknown_users)
+                                    self.file_watched.close()
+                                    self.fill_end_date()
+                                    exit()
+                                self.list_data(search="dbg_data", use_alt_list=True)
+                                self.remove_from_list(self.movie_data, suggestion, watched_movies_list)
+                                self.file_watched.write(f"{movie_raw} | {user} <{datetime.now().strftime('%Y-%m-%d %I:%M %p')}>\n")  # ;Save the watched movie with whom suggested it in a file for referrence
+                                p(f"\nMovies watched: {len(watched_movies_list)}\n\nWatched Movies: {watched_movies_list}\n\nMovie List: {self.movie_data}\n")  # ;Shows current information
+                                p("-------------------------------------------------")
+                                if len(self.movie_data) == 0:
+                                    p(f"Show List is empty\nSaving Suggestion counters to {self.filename[:self.filename.index('.')]}_user_suggestion.txt")
+                                    self.save_to_counter_file_from_list(usernames, unknown_users)
+                                    self.fill_end_date()
+                                    exit()
+                    elif len(suggestion_s) > 1:
+                        if suggestion_s[-1] == "":
+                            suggestion_s.pop(-1)
+                        flags = suggestion_s[1]
+                        if flags in ["PRIORITY", "MUST", "MUST_WATCH"] and self.movie_data[self.movie_data.index(suggestion)] not in priority_failed_attempts:
+                            if suggestion_s[-1].isspace():
+                                suggestion_s[0] = suggestion_s[:-1]
+                            priority_failed_attempts.append(self.movie_data[self.movie_data.index(suggestion)])
+                            self.movie_data[self.movie_data.index(suggestion)][0] = suggestion_s[0]
+                            p(f'"{user}" has attempted to call the priority command when they do not have the permission to')
+        del priority_failed_attempts
+        p("Done with priority calls\n")
         while len(self.movie_data) != 0:  # ;Continuous loop that will only stop when the entries on the 'show_data' list is 0
             if self.debug_mode == 1:
                 self.dbg_data({
@@ -411,14 +496,13 @@ class MovieNight:
                     "user_data_dict": user_data_dict,
                     "unknown_users": unknown_users
                 })
-            else:
-                if 'dbg_data' in vars(self).keys():
-                    del self.dbg_data
+            elif 'dbg_data' in vars(self).keys():
+                del self.dbg_data
 
             pick = choice(self.movie_data)  # ;Chooses movie randomly
             pick_movie = pick[0]  # ;Movie
             pick_suggested_by = pick[1]  # ;Gets the user who suggested the movie
-            p(f"Movie Picked '{pick}'\nSuggested By: {pick_suggested_by}\n")  # ;Chooses movie randomly and shows who suggested it with when it was picked
+            p(f"Movie Picked '{pick_movie}'\nSuggested By: {pick_suggested_by}\n")  # ;Chooses movie randomly and shows who suggested it with when it was picked
             command = input("Is movie done? ")  # ;Waits for confirmation from user if the show one/more are watching is done
             p("-------------------------------------------------")
 
@@ -451,4 +535,3 @@ class MovieNight:
                 self.save_to_counter_file_from_list(usernames, unknown_users)
                 self.fill_end_date()
                 break
-
